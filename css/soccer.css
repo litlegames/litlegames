@@ -1,0 +1,40 @@
+.playground {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  z-index: 1;
+}
+
+.field {
+  position: relative;
+  background-color: green;
+  background-image: linear-gradient(to right bottom, #199e3c, #489316);
+  border: solid;
+  border-width: 10px;
+  border-color: bisque;
+}
+
+.ball-div {
+  position: absolute;
+  transition: top 0.5s, left 0.5s;
+  top: 0;
+  left: 0;
+  z-index: 4;
+}
+
+.enemy-div {
+  position: absolute;
+  transition: top 1s, left 1s, opacity 1s;
+  top: 0;
+  left: 0;
+  opacity: 0.05;
+  z-index: 2;
+}
+
+.toy-div  {
+  position: absolute;
+  transition: top 0.5s, left 0.5s;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
