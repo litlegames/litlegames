@@ -1,10 +1,50 @@
 
+function addEnemy(game) {
+  var gameNames = ['soccer', '', '', '', '', '', '', '', '', ''];
+  var enemyDiv = document.createElement('div');
+    enemyDiv.classList.add('enemy-div');
+    enemyDiv.innerHTML = '<img src="img/enemies/' + gameNames[game] +
+                         '-add' + Math.floor( Math.random() * 2.99 ) +
+                         '.png" style="width: 32px">';
+
+  setEnemyPosition(enemyDiv);
+  document.getElementsByClassName('field')[0].appendChild(enemyDiv);
+}
+
+
 function addMenuOptions(game) {
     for (var i = 0; i < 3; i++) {
       var option = createMenuButton(i, game);
       document.getElementsByClassName('menu-div')[0].appendChild(option);
     }
   setFirstButton();
+}
+
+
+function changeMassSpaces() {
+  createSpacesResize();
+  setTimeout( function() {
+    for (var i = 0; i < spacesMass.length; i++) {
+      setEnemyPosition( spacesMass[i].enemy, true );
+    }
+  }, 0);
+}
+
+
+function checkCollisions() {
+  var nodesToDel = [];
+  var field = document.getElementsByClassName('field')[0];
+  for (var i = 0; i < spacesMass.length; i++) {
+    if ( detectCollision(spacesMass[i].enemy) ) {
+      nodesToDel.push(i);
+    }
+  }
+  for (var j = nodesToDel.length - 1; j >= 0; j--) {
+    var node = spacesMass.splice(nodesToDel[j], 1)[0];
+    field.removeChild(node.enemy);
+    node.enemy = false;
+    freeSpacesCatalogue.push(node);
+  }
 }
 
 
@@ -22,6 +62,24 @@ function clearGlobalMass() {
   freeSpacesCatalogue = [];
   reservedSpace = [];
   spacesMass = [];
+}
+
+
+function createEnemiesOnStart(game) {
+  for (var i = 0; i < 10; i++) createEnemiesOnStartInnerFunction(i, game);
+}
+
+
+function createEnemiesOnStartInnerFunction(i, game) {
+  setTimeout( function() {
+    var gameNames = ['soccer', '', '', '', '', '', '', '', '', ''];
+    var enemyDiv = document.createElement('div');
+      enemyDiv.classList.add('enemy-div');
+      enemyDiv.innerHTML = '<img src="img/enemies/' + gameNames[game] +
+                           i + '.png" style="width: 32px">';
+    document.getElementsByClassName('field')[0].appendChild(enemyDiv);
+    setEnemyPosition(enemyDiv);
+  }, i * 100);
 }
 
 
@@ -69,6 +127,49 @@ function createMenuButton(optionNumber, game) {
 }
 
 
+function createSpaces() {
+  var fieldSize = getComputedStyle(document.getElementsByClassName('field')[0])
+  var slotWidth = parseInt(fieldSize.width) / 10;
+  var heightSlots = Math.floor(parseInt(fieldSize.height) / slotWidth);
+
+    for (var i = 0; i < heightSlots; i++) {
+      for (var j = 0; j < 9; j++) {
+        var slot = {};
+          slot.left = (slotWidth / 2 + j * slotWidth) + 'px';
+          slot.top = (i * slotWidth) + 'px';
+          slot.enemy = false;
+        freeSpacesCatalogue.push(slot);
+
+        if ( (j === 3) || (j === 4) || (j === 5) ) {
+          var tempI = heightSlots - Math.floor(heightSlots / 2);
+          if ( (i === tempI) || (i === (tempI - 1) ) || ( i === (tempI - 2) ) ) {
+            reservedSpace.push( freeSpacesCatalogue.pop() );
+            }
+        }
+      }
+    }
+}
+
+
+function createSpacesResize() {
+  var newSpacesCatalogue = [];
+  var fieldSize = getComputedStyle(document.getElementsByClassName('field')[0])
+  var slotWidth = parseInt(fieldSize.width) / 10;
+  var heightSlots = Math.floor(parseInt(fieldSize.height) / slotWidth);
+
+    for (var i = 0; i < heightSlots; i++) {
+      for (var j = 0; j < 9; j++) {
+        var slot = {};
+          slot.left = (slotWidth / 2 + j * slotWidth) + 'px';
+          slot.top = (i * slotWidth) + 'px';
+          slot.enemy = false;
+        newSpacesCatalogue.push(slot);
+      }
+    }
+  freeSpacesCatalogue = newSpacesCatalogue;
+}
+
+
 function createToy() {
   var toysMass = ['ball.png', 'doge.png', 'polo.png', 'basketball.png',
                   'peep.png', 'tennis.png', 'spaceship.png', 'heart.png',
@@ -90,6 +191,15 @@ function deleteToy() {
 }
 
 
+function detectCollision(node) {
+  var ballRect = document.getElementsByClassName('ball-div')[0].getBoundingClientRect();
+  var enemyRect = node.getBoundingClientRect();
+
+  return ballRect.left < enemyRect.right && ballRect.top < enemyRect.bottom &&
+         ballRect.right > enemyRect.left && ballRect.bottom > enemyRect.top;
+}
+
+
 function exitGame() {
   stopTimer();
   clearGlobalMass();
@@ -102,6 +212,22 @@ function exitGame() {
   document.getElementsByClassName('header')[0].scrollIntoView();
 
   jumpingToy();
+}
+
+
+function findFreeSpaceForEnemy(node, some) {
+  var slot = freeSpacesCatalogue.splice(Math.floor(Math.random() *
+            (freeSpacesCatalogue.length - 0.01)), 1)[0];
+    slot.enemy = node;
+    if (some === false) spacesMass.push(slot);
+  return { top: slot.top, left: slot.left };
+}
+
+
+function getOnReservedPosition() {
+  for (var i = 0; i < reservedSpace.length; i++) {
+    freeSpacesCatalogue.push( reservedSpace.splice(i, 1)[0] );
+  }
 }
 
 
@@ -219,7 +345,8 @@ function setArrows() {
 
 function setBall(file, speed) {
   var ball = document.createElement('div');
-    ball.innerHTML = '<img class="ball" style="width: 64px" src="img/soccer/' + file + '">';
+    ball.innerHTML = '<img class="ball" style="width: 64px" src="img/soccer/' +
+                     file + '">';
     ball.classList.add('ball-div');
     ball.style.transition = speed;
 
@@ -258,6 +385,22 @@ function setCaruselResized() {
     for (var i = 0; i < imgMass.length; i++) {
       imgMass[i].style.left = '0px';
     }
+}
+
+
+function setCollisionTimer() {
+  collisionTimer = setInterval(function() { checkCollisions(); }, 50);
+}
+
+
+function setEnemyPosition(node, some=false) {
+  var enemyPlace = findFreeSpaceForEnemy(node, some);
+    node.children[0].style.width = (parseInt(getComputedStyle(document.
+                 getElementsByClassName('field')[0]).width) / 10) + 'px';
+    node.style.top = enemyPlace.top;
+    node.style.left = enemyPlace.left;
+    node.style.opacity = '0.05';
+  setTimeout( function () { node.style.opacity = '0.8'; }, 0);
 }
 
 
@@ -326,137 +469,70 @@ function stopTimer() {
 /*  NOW  WORKING ON  */
 
 function startGame(game) {
-
+  var timeToEnemyTimer = [750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000];
   createSpaces();
   createEnemiesOnStart(game);
-  var timeToNewEnemy = [2000, 1850, 1700, 1550, 1400, 1250, 1100, 950, 800, 650];
+  createCountdownClock(game);
+  setTimeout( setCollisionTimer, 1000 );
+  setTimeout( function() { setEnemyTimer(game); }, timeToEnemyTimer[game] );
+
+  getOnReservedPosition();
+}
+
+//
+
+function setEnemyTimer(game) {
+  var timeToNewEnemy = [1400, 1300, 1200, 1100, 1000, 900, 800, 700, 600, 500];
   enemyTimer = setInterval( function() {
     if (document.getElementsByClassName('field')[0].children.length > 25 ||
       spacesMass.length === 0) {
-      exitGame()
+      exitGame() // game over;
       return;
     }
     addEnemy(game);
   } , timeToNewEnemy[game] );
-
-  var menuDiv = document.getElementsByClassName('menu-div')[0];
-    menuDiv.setAttribute('hidden', true);
-  getOnReservedPosition();
-
 }
 
 
-function createEnemiesOnStart(game) {
-  for (var i = 0; i < 10; i++) {
-    (function(i, game) {
-      setTimeout(function() {
-        var gameNames = ['soccer', '', '', '', '', '', '', '', '', ''];
-        var enemyDiv = document.createElement('div');
-        enemyDiv.classList.add('enemy-div');
-        enemyDiv.innerHTML = '<img src="img/enemies/' + gameNames[game] + i + '.png" style="width: 32px">';
-        document.getElementsByClassName('field')[0].appendChild(enemyDiv);
-        setEnemyPosition(enemyDiv);
-      }, i * 100);
-    })(i, game);
-  }
-
-}
-
-function addEnemy(game) {
-
-  var gameNames = ['soccer', '', '', '', '', '', '', '', '', ''];
-  var randomEnemy = Math.floor( Math.random() * 2.99 );
-  var field = document.getElementsByClassName('field')[0];
-  var enemyDiv = document.createElement('div');
-    enemyDiv.classList.add('enemy-div');
-    enemyDiv.innerHTML = '<img src="img/enemies/' + gameNames[game] + '-add' + randomEnemy + '.png" style="width: 32px">';
-
-    setEnemyPosition(enemyDiv);
-    field.appendChild(enemyDiv);
-
-}
-
-
-function setEnemyPosition(node, some=false) {
-  var enemyWidth = parseInt(getComputedStyle(document.
-                   getElementsByClassName('field')[0]).width) / 10;
-  var enemyPlace = findFreeSpaceForEnemy(node, some);
-    node.children[0].style.width = enemyWidth + 'px';
-    node.style.top = enemyPlace.top;
-    node.style.left = enemyPlace.left;
-    node.style.opacity = '0.05';
-  setTimeout( function () { node.style.opacity = '0.8'; }, 0);
-}
-
-
-function findFreeSpaceForEnemy(node, some) {
-  var randomSeed = Math.floor( Math.random() * (freeSpacesCatalogue.length - 0.01) );
-  var slot = freeSpacesCatalogue.splice(randomSeed, 1)[0];
-    slot.enemy = node;
-    if (some === false) {
-      spacesMass.push(slot);
-    }
-  return { top: slot.top, left: slot.left };
-}
-
-
-function createSpaces() {
-  var fieldSize = getComputedStyle(document.getElementsByClassName('field')[0])
-  var slotWidth = parseInt(fieldSize.width) / 10;
-  var heightSlots = Math.floor(parseInt(fieldSize.height) / slotWidth);
-
-    for (var i = 0; i < heightSlots; i++) {
-      for (var j = 0; j < 9; j++) {
-        var slot = {};
-          slot.left = (slotWidth / 2 + j * slotWidth) + 'px';
-          slot.top = (i * slotWidth) + 'px';
-          slot.enemy = false;
-        freeSpacesCatalogue.push(slot);
-
-        if ( (j === 3) || (j === 4) || (j === 5) ) {
-          var tempI = heightSlots - Math.floor(heightSlots / 2);
-          if ( (i === tempI) || (i === (tempI - 1) ) || ( i === (tempI - 2) ) ) {
-            reservedSpace.push( freeSpacesCatalogue.pop() );
-            }
-        }
-      }
-    }
-}
-
-
-function createSpacesResize() {
-  var newSpacesCatalogue = [];
-  var fieldSize = getComputedStyle(document.getElementsByClassName('field')[0])
-  var slotWidth = parseInt(fieldSize.width) / 10;
-  var heightSlots = Math.floor(parseInt(fieldSize.height) / slotWidth);
-
-    for (var i = 0; i < heightSlots; i++) {
-      for (var j = 0; j < 9; j++) {
-        var slot = {};
-          slot.left = (slotWidth / 2 + j * slotWidth) + 'px';
-          slot.top = (i * slotWidth) + 'px';
-          slot.enemy = false;
-        newSpacesCatalogue.push(slot);
-      }
-    }
-  freeSpacesCatalogue = newSpacesCatalogue;
-}
-
-
-function changeMassSpaces() {
-  createSpacesResize();
+function createCountdownClock(game) {
+  var countdownClock = document.createElement('div');
+    countdownClock.classList.add('countdown-clock');
+    countdownClock.innerHTML = '<span>Ready!</span>';
+    countdownClock.style.borderColor = gameSets[game].borderColor;
+  document.getElementsByClassName('field')[0].appendChild(countdownClock);
+  var countdownClockTimer = setInterval(changeCountdownClockInnerHTML, 1000);
+  hideOptionButtons();
   setTimeout( function() {
-    for (var i = 0; i < spacesMass.length; i++) {
-      setEnemyPosition( spacesMass[i].enemy, true );
-    }
-  }, 0);
+    clearInterval(countdownClockTimer);
+    document.getElementsByClassName('field')[0].
+      removeChild(document.getElementsByClassName('countdown-clock')[0]);
+      document.getElementsByClassName('menu-div')[0].setAttribute('hidden', true);
+  }, 4500);
 }
 
 
-function getOnReservedPosition() {
-  for (var i = 0; i < reservedSpace.length; i++) {
-    freeSpacesCatalogue.push( reservedSpace.splice(i, 1)[0] );
+function changeCountdownClockInnerHTML() {
+  var countdownClock = document.getElementsByClassName('countdown-clock')[0];
+  if (countdownClock.innerHTML === '<span>Ready!</span>') {
+    countdownClock.innerHTML = '<span>3</span>';
+    countdownClock.style.fontSize = '60px';
+  } else if (countdownClock.innerHTML === '<span>3</span>') {
+    countdownClock.innerHTML = '<span>2</span>';
+  } else if (countdownClock.innerHTML === '<span>2</span>') {
+    countdownClock.innerHTML = '<span>1</span>';
+  } else if (countdownClock.innerHTML === '<span>1</span>') {
+    countdownClock.innerHTML = '<span>GO!</span>';
+    countdownClock.style.fontSize = '30px';
   }
+}
+
+
+function hideOptionButtons() {
+  var buttons = document.getElementsByClassName('option-button')
+    for (var i = 0; i < buttons.length; i++) {
+      console.log(buttons[i]);
+      buttons[i].setAttribute('hidden', true);
+    }
 }
 
 
