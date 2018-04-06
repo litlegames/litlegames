@@ -347,17 +347,17 @@ function startGame(game) {
 
 
 function createEnemiesOnStart(game) {
-
-  var gameNames = ['soccer', '', '', '', '', '', '', '', '', ''];
-  var field = document.getElementsByClassName('field')[0];
-
   for (var i = 0; i < 10; i++) {
-    var enemyDiv = document.createElement('div');
-      enemyDiv.classList.add('enemy-div');
-      enemyDiv.innerHTML = '<img src="img/enemies/' + gameNames[game] + i + '.png" style="width: 32px">';
-
-    field.appendChild(enemyDiv);
-    setEnemyPosition(enemyDiv);
+    (function(i, game) {
+      setTimeout(function() {
+        var gameNames = ['soccer', '', '', '', '', '', '', '', '', ''];
+        var enemyDiv = document.createElement('div');
+        enemyDiv.classList.add('enemy-div');
+        enemyDiv.innerHTML = '<img src="img/enemies/' + gameNames[game] + i + '.png" style="width: 32px">';
+        document.getElementsByClassName('field')[0].appendChild(enemyDiv);
+        setEnemyPosition(enemyDiv);
+      }, i * 100);
+    })(i, game);
   }
 
 }

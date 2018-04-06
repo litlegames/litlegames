@@ -29,6 +29,9 @@
   left: 0;
   opacity: 0.05;
   z-index: 2;
+
+  animation: shake .7s linear alternate infinite;
+  -webkit-animation: shake .7s linear alternate infinite;
 }
 
 .toy-div  {
@@ -37,4 +40,52 @@
   top: 0;
   left: 0;
   z-index: 0;
+}
+
+
+/* ANIMATION */
+
+@keyframes shake {
+  0% {
+    transform: translate(25%, -25%);
+  }
+  25% {
+    transform: translate(25%, 25%);
+  }
+  75%  {
+    transform: translate(-25%, -25%);
+  }
+  100% {
+    transform: translate(-25%, 25%);
+  }
+}
+
+@-webkit-keyframes shake {
+  0% {
+    -webkit-transform: translate(25%, -25%);
+  }
+  25% {
+    -webkit-transform: translate(25%, 25%);
+  }
+  75%  {
+    -webkit-transform: translate(-25%, -25%);
+  }
+  100% {
+    -webkit-transform: translate(-25%, 25%);
+  }
+}
+
+@-moz-keyframes shake {
+  0% {
+    -moz-transform: translate(25%, -25%);
+  }
+  25% {
+    -moz-transform: translate(25%, 25%);
+  }
+  75%  {
+    -moz-transform: translate(-25%, -25%);
+  }
+  100% {
+    -moz-transform: translate(-25%, 25%);
+  }
 }
