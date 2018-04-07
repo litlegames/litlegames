@@ -1,10 +1,11 @@
 
 function addEnemy(game) {
-  var gameNames = ['soccer', '', '', '', '', '', '', '', '', ''];
+  var gameNames = ['soccer', 'doge', 'polo', 'basket', 'peep',
+                   'tennis', 'space', 'love', 'putin', 'js'];
   var enemyDiv = document.createElement('div');
     enemyDiv.classList.add('enemy-div');
     enemyDiv.innerHTML = '<img src="img/enemies/' + gameNames[game] +
-                         '-add' + Math.floor( Math.random() * 2.99 ) +
+                         Math.floor( Math.random() * 12.99 ) +
                          '.png" style="width: 32px">';
 
   setEnemyPosition(enemyDiv);
@@ -72,7 +73,8 @@ function createEnemiesOnStart(game) {
 
 function createEnemiesOnStartInnerFunction(i, game) {
   setTimeout( function() {
-    var gameNames = ['soccer', '', '', '', '', '', '', '', '', ''];
+    var gameNames = ['soccer', 'doge', 'polo', 'basket', 'peep',
+                     'tennis', 'space', 'love', 'putin', 'js'];
     var enemyDiv = document.createElement('div');
       enemyDiv.classList.add('enemy-div');
       enemyDiv.innerHTML = '<img src="img/enemies/' + gameNames[game] +
@@ -463,17 +465,18 @@ function setLogoSize() {
 
 function stopTimer() {
   clearInterval(enemyTimer);
+  clearInterval(collisionTimer);
 }
 
 
 /*  NOW  WORKING ON  */
 
 function startGame(game) {
-  var timeToEnemyTimer = [750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000];
+  var timeToEnemyTimer = [750, 900, 1100, 1300, 1500, 1700, 1900, 2100, 2300, 2500];
   createSpaces();
   createEnemiesOnStart(game);
   createCountdownClock(game);
-  setTimeout( setCollisionTimer, 1000 );
+  setTimeout( setCollisionTimer, 4500 );
   setTimeout( function() { setEnemyTimer(game); }, timeToEnemyTimer[game] );
 
   getOnReservedPosition();
@@ -482,11 +485,14 @@ function startGame(game) {
 //
 
 function setEnemyTimer(game) {
-  var timeToNewEnemy = [1400, 1300, 1200, 1100, 1000, 900, 800, 700, 600, 500];
+  var timeToNewEnemy = [977, 933, 888, 833, 777, 712, 645, 578, 511, 444];
   enemyTimer = setInterval( function() {
-    if (document.getElementsByClassName('field')[0].children.length > 25 ||
-      spacesMass.length === 0) {
-      exitGame() // game over;
+    if (document.getElementsByClassName('field')[0].children.length > 25) {
+      gameOver(); // game over;
+      return;
+    }
+    if (spacesMass.length === 0) {
+      winGame();
       return;
     }
     addEnemy(game);
@@ -515,14 +521,14 @@ function changeCountdownClockInnerHTML() {
   var countdownClock = document.getElementsByClassName('countdown-clock')[0];
   if (countdownClock.innerHTML === '<span>Ready!</span>') {
     countdownClock.innerHTML = '<span>3</span>';
-    countdownClock.style.fontSize = '60px';
+    countdownClock.style.fontSize = '80px';
   } else if (countdownClock.innerHTML === '<span>3</span>') {
     countdownClock.innerHTML = '<span>2</span>';
   } else if (countdownClock.innerHTML === '<span>2</span>') {
     countdownClock.innerHTML = '<span>1</span>';
   } else if (countdownClock.innerHTML === '<span>1</span>') {
     countdownClock.innerHTML = '<span>GO!</span>';
-    countdownClock.style.fontSize = '30px';
+    countdownClock.style.fontSize = '40px';
   }
 }
 
@@ -536,6 +542,35 @@ function hideOptionButtons() {
 }
 
 
+function gameOver() {
+  stopTimer();
+  document.getElementsByClassName('menu-div')[0].removeAttribute('hidden');
+  createGameOverSign();
+  setTimeout(exitGame, 5000);
+}
 
-function gameOver() {}
+
+function createGameOverSign() {
+  var gameOverSign = document.createElement('div');
+    gameOverSign.classList.add('game-over-sign');
+  document.getElementsByClassName('field')[0].appendChild(gameOverSign);
+}
+
+
+function winGame() {
+  stopTimer();
+  document.getElementsByClassName('menu-div')[0].removeAttribute('hidden');
+  createWinSign();
+  setTimeout(exitGame, 5000);
+}
+
+
+function createWinSign() {
+  var winSign = document.createElement('div');
+    winSign.classList.add('win-sign');
+  document.getElementsByClassName('field')[0].appendChild(winSign);
+}
+
+
+
 function continueGame() {}
